@@ -41,7 +41,7 @@ class Blockchain:
         encoded_block = json.dumps(block, sort_keys = True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
 
-    def if_chain_valid(self, chain):
+    def is_chain_valid(self, chain):
         previous_block = chain[0]
         block_index = 1
         while block_index < len(chain):
@@ -50,7 +50,7 @@ class Blockchain:
                 return False
             previous_proof = previous_block['proof']
             proof = block['proof']
-            hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
+            hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
             if hash_operation[:4] != '0000':
                 return False
             previous_block = block
@@ -95,6 +95,18 @@ def get_chain():
         'length' : len(blockchain.chain)
     }
     return jsonify(response), 200
+
+# Validate the Blockchain
+
+@app.route('/is_valid', methods=['GET'])
+def is_valid():
+    is_valid = blockchain.is_chain_valid(blockchain.chain)
+    if is_valid:
+        response = {'message' : 'The Blockchain is valid'}
+    else:
+        response = {'message' : 'You have a problem. The Blockchain is not valid'}
+    return jsonify(response), 200
+
 
 #Running the app
 
